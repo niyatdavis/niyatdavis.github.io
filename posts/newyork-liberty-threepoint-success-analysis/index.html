@@ -194,7 +194,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <p>The New York Liberty Dominate Three-point Shooting.</p>
 <p>Or at least… that’s what I thought.</p>
-<p>The New York Liberty were the top team in the WNBA 2024 season, so it’s natural to assume they’re a nightmare when it comes to three-point shooting, right?</p>
+<p>Heading into this analysis, I assumed the top team in the WNBA 2024 season had to be lights-out when it came to three-point shooting. The New York Liberty racked up wins, played with confidence, and looked unstoppable—but when I created a scatter plot comparing three-point percentage to win percentage across teams, the results surprised me. The Liberty were certainly winning, but their three-point shooting? Just barely above average. This finding challenged my assumptions and raised a bigger question: <em>If it’s not the three-points then what’s actually driving their success?</em></p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -250,6 +250,51 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div>
 <figure class="figure">
 <p><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Well, let’s look into other factors like rebounds.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>wnbadata <span class="ot">&lt;-</span> <span class="fu">load_wnba_team_box</span>(<span class="dv">2024</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(season_type <span class="sc">==</span> <span class="dv">2</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>seasondata <span class="ot">&lt;-</span> wnbadata <span class="sc">|&gt;</span> </span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(team_name) <span class="sc">|&gt;</span> </span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">total_rebounds =</span> <span class="fu">sum</span>(total_rebounds),</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">total_wins =</span> <span class="fu">sum</span>(<span class="fu">ifelse</span>(team_winner <span class="sc">==</span> <span class="cn">TRUE</span>, <span class="dv">1</span>, <span class="dv">0</span>))</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(total_rebounds <span class="sc">&gt;</span> <span class="dv">100</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>libertydata <span class="ot">&lt;-</span> seasondata <span class="sc">|&gt;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    team_name <span class="sc">==</span> <span class="st">"Liberty"</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(seasondata, <span class="fu">aes</span>(<span class="at">x =</span> total_rebounds, <span class="at">y =</span> total_wins)) <span class="sc">+</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">size =</span> total_rebounds, <span class="at">fill =</span> team_name <span class="sc">==</span> <span class="st">"Liberty"</span>),</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>             <span class="at">shape =</span> <span class="dv">21</span>, <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_size</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">10</span>), <span class="at">name =</span> <span class="st">"Total Rebounds"</span>) <span class="sc">+</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"FALSE"</span> <span class="ot">=</span> <span class="st">"grey"</span>, <span class="st">"TRUE"</span> <span class="ot">=</span> <span class="st">"red"</span>), <span class="at">guide =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Total Rebounds vs. Total Wins (2024 WNBA Season)"</span>,</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Total Rebounds"</span>,</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Total Wins"</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: The `guide` argument in `scale_*()` cannot be `FALSE`. This was deprecated in
+ggplot2 3.3.4.
+ℹ Please use "none" instead.</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
